@@ -1,0 +1,338 @@
+﻿@model DapperRetailSalesProject.Dtos.DashboardDto
+@{
+    ViewData["Title"] = "S-Retail Yönetim Paneli";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    // Tema Renkleri
+    string themePrimary = "#FF8500";
+    string themeDark = "#333333";
+    string themeLight = "#FFF0E0";
+}
+
+<style>
+    /* Kurumsal Tema Değişkenleri */
+    :root {
+        --theme-primary: #FF8500;
+        --theme-dark: #333333;
+    }
+
+    .card {
+        transition: all 0.3s ease;
+        border: none;
+    }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 .5rem 1rem rgba(0,0,0,.15) !important;
+        }
+
+    .text-theme {
+        color: var(--theme-primary) !important;
+    }
+
+    .bg-theme {
+        background-color: var(--theme-primary) !important;
+        color: white;
+    }
+
+    /* Harita Alanı İçin Sabit Yükseklik */
+    #regions_div {
+        width: 100%;
+        height: 350px;
+        border-radius: 0 0 10px 10px;
+    }
+</style>
+
+<div class="container-fluid pt-4 px-4">
+    <div class="row mb-4 align-items-end">
+        <div class="col-12">
+            <h3 class="fw-bold mb-0" style="color: var(--theme-dark);">
+                <i class="fas fa-chart-pie me-2 text-theme"></i>S-Retail: Stratejik Analiz Paneli
+            </h3>
+            <p class="text-muted mb-0">Toplam satış kayıtları üzerinden canlı veri analizi</p>
+        </div>
+    </div>
+
+    <div class="card shadow-sm mb-4" style="border-top: 4px solid var(--theme-primary) !important;">
+        <div class="card-body py-4">
+            <form method="get" asp-action="Index" class="row g-3 align-items-end">
+
+                <div class="col-md-2">
+                    <label class="small fw-bold text-muted mb-1">MAĞAZA FORMATI</label>
+                    <select name="storeFormat" class="form-select border-0 bg-light">
+                        <option value="" selected="@(string.IsNullOrEmpty(ViewBag.SelectedFormat))">Tüm Formatlar</option>
+                        <option value="S-Online" selected="@(ViewBag.SelectedFormat == "S-Online")">S-Online</option>
+                        <option value="S-Express" selected="@(ViewBag.SelectedFormat == "S-Express")">S-Express</option>
+                        <option value="S-Super" selected="@(ViewBag.SelectedFormat == "S-Super")">S-Super</option>
+                        <option value="S-Mega" selected="@(ViewBag.SelectedFormat == "S-Mega")">S-Mega</option>
+                    </select>
+                </div>
+
+                <div class="col-md-2">
+                    <label class="small fw-bold text-muted mb-1">KATEGORİ</label>
+                    <select name="category" class="form-select border-0 bg-light">
+                        <option value="">Tüm Kategoriler</option>
+                        <option value="Teknoloji" selected="@(ViewBag.SelectedCategory == "Teknoloji")">Teknoloji</option>
+                        <option value="Gıda" selected="@(ViewBag.SelectedCategory == "Gıda")">Gıda</option>
+                        <option value="Manav" selected="@(ViewBag.SelectedCategory == "Manav")">Manav</option>
+                        <option value="Et & Balık" selected="@(ViewBag.SelectedCategory == "Et & Balık")">Et & Balık</option>
+                        <option value="Kişisel Bakım" selected="@(ViewBag.SelectedCategory == "Kişisel Bakım")">Kişisel Bakım</option>
+                    </select>
+                </div>
+
+                <div class="col-md-2">
+                    <label class="small fw-bold text-muted mb-1">BAŞLANGIÇ</label>
+                    <input type="date" name="startDate" class="form-control border-0 bg-light" value="@ViewBag.StartDate" />
+                </div>
+                <div class="col-md-2">
+                    <label class="small fw-bold text-muted mb-1">BİTİŞ</label>
+                    <input type="date" name="endDate" class="form-control border-0 bg-light" value="@ViewBag.EndDate" />
+                </div>
+
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary w-100 fw-bold border-0 shadow-sm" style="background-color: var(--theme-primary);">
+                        <i class="fas fa-search me-1"></i> ANALİZ ET
+                    </button>
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" asp-action="ExportToExcel" class="btn btn-success w-100 fw-bold border-0 shadow-sm">
+                        <i class="fas fa-file-excel me-1"></i> EXCEL İNDİR
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="row mb-4 text-center">
+        <div class="col-md-3">
+            <div class="card shadow-sm text-white h-100" style="background-color: var(--theme-primary);">
+                <div class="card-body py-4">
+                    <div class="d-flex align-items-center justify-content-center mb-2">
+                        <i class="fas fa-lira-sign me-2 opacity-50 display-6"></i>
+                    </div>
+                    <h6 class="text-uppercase small opacity-75">Toplam Ciro</h6>
+                    <h3 class="fw-bold mb-0">@Model.TotalRevenue.ToString("C0")</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card shadow-sm text-white h-100" style="background-color: #FC9D37;">
+                <div class="card-body py-4">
+                    <div class="d-flex align-items-center justify-content-center mb-2">
+                        <i class="fas fa-shopping-bag me-2 opacity-50 display-6"></i>
+                    </div>
+                    <h6 class="text-uppercase small opacity-75">Satış Adedi</h6>
+                    <h3 class="fw-bold mb-0">@Model.TotalOrderCount.ToString("N0")</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card shadow-sm text-white h-100" style="background-color: var(--theme-dark);">
+                <div class="card-body py-4">
+                    <div class="d-flex align-items-center justify-content-center mb-2">
+                        <i class="fas fa-wallet me-2 opacity-50 display-6"></i>
+                    </div>
+                    <h6 class="text-uppercase small opacity-75">Sepet Ortalaması</h6>
+                    <h3 class="fw-bold mb-0">@Model.AverageOrderValue.ToString("C2")</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card shadow-sm h-100" style="background-color: @themeLight; color: var(--theme-primary);">
+                <div class="card-body py-4">
+                    <div class="d-flex align-items-center justify-content-center mb-2">
+                        <i class="fas fa-store me-2 opacity-50 display-6"></i>
+                    </div>
+                    <h6 class="text-uppercase small fw-bold opacity-75">Aktif Mağaza</h6>
+                    <h3 class="fw-bold mb-0">@Model.ActiveStoreCount <small class="fs-6 text-success">● Canlı</small></h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-4 text-center">
+        <div class="col-md-4">
+            <div class="card shadow-sm border-start border-4 border-theme h-100">
+                <div class="card-body py-4">
+                    <h6 class="small fw-bold text-muted text-uppercase mb-3">🏆 En Çok Satan Ürün</h6>
+                    <h5 class="text-theme mb-0 fw-bold">
+                        @Model.MostSoldProduct
+                    </h5>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card shadow-sm border-start border-4 border-theme h-100">
+                <div class="card-body py-4">
+                    <h6 class="small fw-bold text-muted text-uppercase mb-3">🌐 S-Online Ciro Payı</h6>
+                    <h5 class="text-theme mb-0 fw-bold">@Model.SanalMarketRevenue.ToString("C0")</h5>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card shadow-sm border-start border-4 border-theme h-100">
+                <div class="card-body py-4">
+                    <h6 class="small fw-bold text-muted text-uppercase mb-3">📈 Tahmini Net Kâr (%15)</h6>
+                    <h5 class="text-success mb-0 fw-bold">
+                        @((Model.TotalRevenue * 0.15m).ToString("C0"))
+                    </h5>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-white fw-bold small text-muted">FORMAT DAĞILIMI (CİRO)</div>
+                <div class="card-body">
+                    <canvas id="formatChart" style="height:300px"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-8">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-white fw-bold small d-flex justify-content-between align-items-center">
+                    <span>TÜRKİYE SATIŞ YOĞUNLUĞU HARİTASI</span>
+                    <span class="badge bg-theme"><i class="fas fa-map-marker-alt me-1"></i> İl Bazlı Canlı</span>
+                </div>
+                <div class="card-body p-0">
+                    <div id="regions_div"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white fw-bold small text-muted d-flex justify-content-between align-items-center">
+                    <span>SATIŞ PERFORMANS TRENDİ (SON 30 GÜN)</span>
+                    <i class="fas fa-chart-line text-theme fs-5"></i>
+                </div>
+                <div class="card-body">
+                    <canvas id="trendChart" style="height: 300px; width: 100%;"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+        // --------------------------------------------------------
+        // 1. FORMAT DAĞILIMI (PASTA GRAFİK) - JSON GARANTİLİ
+        // --------------------------------------------------------
+        const ctxFormat = document.getElementById('formatChart');
+        if (ctxFormat) {
+            var formatLabels = @Html.Raw(Json.Serialize(Model.FormatDistribution.Select(x => x.Label)));
+            var formatValues = @Html.Raw(Json.Serialize(Model.FormatDistribution.Select(x => x.Value)));
+
+            new Chart(ctxFormat, {
+                type: 'doughnut',
+                data: {
+                    labels: formatLabels,
+                    datasets: [{
+                        data: formatValues,
+                        backgroundColor: ['#FF8500', '#28a745', '#dc3545', '#17a2b8', '#6c757d'],
+                        borderWidth: 0,
+                        hoverOffset: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom', labels: { usePointStyle: true, boxWidth: 8 } }
+                    }
+                }
+            });
+        }
+
+        // --------------------------------------------------------
+        // 2. TÜRKİYE HARİTASI (GOOGLE GEOCHART) - JSON GARANTİLİ
+        // --------------------------------------------------------
+        google.charts.load('current', {
+            'packages': ['geochart']
+        });
+        google.charts.setOnLoadCallback(drawRegionsMap);
+
+        function drawRegionsMap() {
+            // Veriyi JSON olarak al (Hata riskini sıfıra indirir)
+            var cityData = @Html.Raw(Json.Serialize(Model.CityDistribution));
+
+            // Google Chart formatına çevir
+            var dataArray = [['Şehir', 'Ciro']];
+
+            if (cityData && cityData.length > 0) {
+                cityData.forEach(function(item) {
+                    if(item.label) {
+                        dataArray.push([item.label, item.value]);
+                    }
+                });
+            } else {
+                // Veri yoksa beyaz ekran yerine boş harita gelsin
+                dataArray.push(['Istanbul', 0]);
+                dataArray.push(['Ankara', 0]);
+            }
+
+            var data = google.visualization.arrayToDataTable(dataArray);
+
+            var options = {
+                region: 'TR',            // Türkiye kodu
+                displayMode: 'regions',
+                resolution: 'provinces', // İl bazlı gösterim
+                colorAxis: { colors: ['#FFD1A9', '#FF8500', '#C44D00'] }, // Renk skalası
+                backgroundColor: 'transparent',
+                datalessRegionColor: '#f8f9fa',
+                defaultColor: '#f5f5f5',
+            };
+
+            var chart = new google.visualization.GeoChart(document.getElementById('regions_div'));
+            chart.draw(data, options);
+        }
+
+        // --------------------------------------------------------
+        // 3. TREND GRAFİĞİ - JSON GARANTİLİ
+        // --------------------------------------------------------
+        const ctxTrend = document.getElementById('trendChart');
+        if (ctxTrend) {
+            var trendLabels = @Html.Raw(Json.Serialize(Model.SalesTrend.Select(x => x.Label)));
+            var trendValues = @Html.Raw(Json.Serialize(Model.SalesTrend.Select(x => x.Value)));
+
+            new Chart(ctxTrend, {
+                type: 'line',
+                data: {
+                    labels: trendLabels,
+                    datasets: [{
+                        label: 'Günlük Ciro',
+                        data: trendValues,
+                        borderColor: '#FF8500',
+                        backgroundColor: 'rgba(255, 133, 0, 0.1)',
+                        borderWidth: 2,
+                        pointBackgroundColor: '#fff',
+                        pointBorderColor: '#FF8500',
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: { borderDash: [2, 2] },
+                            ticks: { callback: function(value) { return '₺' + value.toLocaleString('tr-TR'); } }
+                        },
+                        x: { grid: { display: false } }
+                    }
+                }
+            });
+        }
+    </script>
+}

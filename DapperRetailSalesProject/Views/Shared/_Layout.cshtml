@@ -1,0 +1,143 @@
+﻿<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - S-Retail</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8f9fa;
+        }
+
+        /* SIDEBAR TASARIMI */
+        .sidebar {
+            width: 260px;
+            background-color: #212529; /* Koyu Tema */
+            min-height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            display: flex;
+            flex-direction: column;
+            color: #fff;
+            transition: all 0.3s;
+            z-index: 1000;
+        }
+
+        .sidebar-brand {
+            height: 70px;
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #fff;
+            background-color: rgba(255,255,255,0.05);
+            text-decoration: none;
+        }
+
+        .sidebar-menu {
+            padding: 20px 0;
+            flex-grow: 1;
+        }
+
+        .nav-link {
+            color: rgba(255,255,255,0.7);
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+            transition: 0.3s;
+            border-left: 4px solid transparent;
+        }
+
+            .nav-link:hover, .nav-link.active {
+                color: #fff;
+                background-color: rgba(255,255,255,0.05);
+                border-left-color: #FF8500; /* Senin Turuncu Rengin */
+            }
+
+            .nav-link i {
+                width: 25px;
+                text-align: center;
+                margin-right: 10px;
+            }
+
+        /* PROFİL ALANI (SOL ALT) */
+        .sidebar-profile {
+            background-color: rgba(0,0,0,0.2);
+            padding: 20px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .profile-card {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .profile-avatar {
+            width: 40px;
+            height: 40px;
+            background-color: #FF8500;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+
+        /* Content Area */
+        .main-content {
+            margin-left: 260px;
+            padding: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="sidebar">
+        <a href="/" class="sidebar-brand">
+            <i class="fas fa-chart-pie text-warning me-2"></i>
+            S-RETAIL ANALİZ
+        </a>
+
+        <div class="sidebar-menu">
+            <nav class="nav flex-column">
+                <a href="/Dashboard/Index" class="nav-link @(ViewContext.RouteData.Values["Action"].ToString() == "Index" ? "active" : "")">
+                    <i class="fas fa-tachometer-alt"></i> Dashboard
+                </a>
+                <a href="/Dashboard/List" class="nav-link @(ViewContext.RouteData.Values["Action"].ToString() == "List" ? "active" : "")">
+                    <i class="fas fa-list-ul"></i> Satış Kayıtları
+                </a>
+            </nav>
+        </div>
+
+        <div class="sidebar-profile">
+            <div class="profile-card">
+                <div class="profile-avatar">MY</div>
+                <div class="d-flex flex-column">
+                    <span class="text-white fw-bold small">MERVE YILDIZ</span>
+                    <span class="text-white-50 small" style="font-size: 0.75rem;">Developer</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="main-content">
+        @RenderBody()
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

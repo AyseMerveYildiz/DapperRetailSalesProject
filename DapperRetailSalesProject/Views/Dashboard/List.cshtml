@@ -1,0 +1,266 @@
+﻿@model List<DapperRetailSalesProject.Entities.RetailSale>
+@using System.Globalization
+
+@{
+    ViewData["Title"] = "Operasyonel Satış Kayıtları";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    int currentPage = ViewBag.CurrentPage ?? 1;
+    var trCulture = new CultureInfo("tr-TR");
+
+    // Pagination Helper
+    string GetQuery(int pageNo)
+    {
+        var query = $"?page={pageNo}";
+        if (ViewBag.SearchId != null) query += $"&searchId={ViewBag.SearchId}";
+        if (!string.IsNullOrEmpty(ViewBag.SelectedFormat)) query += $"&storeFormat={ViewBag.SelectedFormat}";
+        if (!string.IsNullOrEmpty(ViewBag.SelectedCategory)) query += $"&category={ViewBag.SelectedCategory}";
+        if (!string.IsNullOrEmpty(ViewBag.SearchProduct)) query += $"&productName={ViewBag.SearchProduct}";
+        if (ViewBag.MinPrice != null) query += $"&minPrice={ViewBag.MinPrice}";
+        if (ViewBag.MaxPrice != null) query += $"&maxPrice={ViewBag.MaxPrice}";
+        if (ViewBag.StartDate != null) query += $"&startDate={ViewBag.StartDate}";
+        if (ViewBag.EndDate != null) query += $"&endDate={ViewBag.EndDate}";
+        return query;
+    }
+}
+
+<style>
+    /* ÖZEL STİLLER */
+    :root {
+        --theme-primary: #FF8500;
+        --theme-dark: #2C3E50;
+        --theme-input-bg: #F3F4F6;
+    }
+
+    .card-filter {
+        border-top: 4px solid var(--theme-primary);
+        background: #fff;
+    }
+
+    /* Soft Input Tasarımı */
+    .form-control-soft, .form-select-soft {
+        background-color: var(--theme-input-bg) !important;
+        border: 1px solid transparent !important;
+        color: #495057;
+        font-weight: 500;
+        transition: all 0.3s;
+    }
+
+        .form-control-soft:focus, .form-select-soft:focus {
+            background-color: #fff !important;
+            border-color: var(--theme-primary) !important;
+            box-shadow: 0 0 0 0.25rem rgba(255, 133, 0, 0.15);
+        }
+
+    /* Tablo Başlığı */
+    .table-header-dark {
+        background-color: var(--theme-dark);
+        color: white;
+    }
+
+    .table-hover tbody tr:hover {
+        background-color: rgba(255, 133, 0, 0.03);
+    }
+</style>
+
+<div class="container-fluid pt-2 px-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h4 class="mb-0 fw-bold" style="color: var(--theme-dark);">
+                <i class="fas fa-list-alt me-2" style="color: var(--theme-primary);"></i>Satış Operasyon Kayıtları
+            </h4>
+            <small class="text-muted">Anlık veri akışı ve detaylı sorgulama ekranı</small>
+        </div>
+        <a href="/Dashboard/Index" class="btn btn-outline-dark btn-sm shadow-sm px-3 py-2 rounded-pill">
+            <i class="fas fa-chart-line me-2"></i>Dashboard
+        </a>
+    </div>
+
+    <div class="card border-0 shadow-sm rounded-3 mb-4 card-filter">
+        <div class="card-header bg-white border-bottom py-3">
+            <div class="d-flex align-items-center">
+                <div class="bg-light rounded-circle p-2 me-2 text-primary">
+                    <i class="fas fa-filter"></i>
+                </div>
+                <h6 class="fw-bold mb-0 text-dark">Detaylı Arama Kriterleri</h6>
+            </div>
+        </div>
+        <div class="card-body p-4">
+            <form method="get" action="/Dashboard/List">
+                <div class="row g-3">
+
+                    <div class="col-md-2">
+                        <label class="form-label small text-secondary fw-bold text-uppercase">Fiş No</label>
+                        <div class="input-group">
+                            <span class="input-group-text border-0 bg-light text-muted"><i class="fas fa-hashtag"></i></span>
+                            <input type="number" name="searchId" class="form-control form-control-soft" placeholder="ID" value="@ViewBag.SearchId">
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label small text-secondary fw-bold text-uppercase">Ürün Ara</label>
+                        <div class="input-group">
+                            <span class="input-group-text border-0 bg-light text-muted"><i class="fas fa-search"></i></span>
+                            <input type="text" name="productName" class="form-control form-control-soft" placeholder="Ürün adı..." value="@ViewBag.SearchProduct">
+                        </div>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label small text-secondary fw-bold text-uppercase">Kategori</label>
+                        <select name="category" class="form-select form-select-soft">
+                            <option value="">Tümü</option>
+                            <option value="Teknoloji" selected="@(ViewBag.SelectedCategory == "Teknoloji")">Teknoloji</option>
+                            <option value="Gıda" selected="@(ViewBag.SelectedCategory == "Gıda")">Gıda</option>
+                            <option value="Manav" selected="@(ViewBag.SelectedCategory == "Manav")">Manav</option>
+                            <option value="Et & Balık" selected="@(ViewBag.SelectedCategory == "Et & Balık")">Et & Balık</option>
+                            <option value="Kişisel Bakım" selected="@(ViewBag.SelectedCategory == "Kişisel Bakım")">Kişisel Bakım</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label small text-secondary fw-bold text-uppercase">Mağaza Formatı</label>
+                        <select name="storeFormat" class="form-select form-select-soft">
+                            <option value="">Tümü</option>
+                            <option value="S-Online" selected="@(ViewBag.SelectedFormat == "S-Online")">S-Online</option>
+                            <option value="S-Express" selected="@(ViewBag.SelectedFormat == "S-Express")">S-Express</option>
+                            <option value="S-Super" selected="@(ViewBag.SelectedFormat == "S-Super")">S-Super</option>
+                            <option value="S-Mega" selected="@(ViewBag.SelectedFormat == "S-Mega")">S-Mega</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-2">
+                        <label class="form-label small text-secondary fw-bold text-uppercase">Başlangıç</label>
+                        <input type="date" name="startDate" class="form-control form-control-soft" value="@ViewBag.StartDate">
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label small text-secondary fw-bold text-uppercase">Bitiş</label>
+                        <input type="date" name="endDate" class="form-control form-control-soft" value="@ViewBag.EndDate">
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label small text-secondary fw-bold text-uppercase">Min (₺)</label>
+                        <input type="number" name="minPrice" class="form-control form-control-soft" placeholder="0" value="@ViewBag.MinPrice">
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label small text-secondary fw-bold text-uppercase">Max (₺)</label>
+                        <input type="number" name="maxPrice" class="form-control form-control-soft" placeholder="Max" value="@ViewBag.MaxPrice">
+                    </div>
+
+                    <div class="col-md-4 d-flex align-items-end gap-2">
+                        <button type="submit" class="btn text-white w-100 fw-bold shadow-sm rounded-3" style="background-color: var(--theme-primary);">
+                            <i class="fas fa-filter me-2"></i>Filtrele
+                        </button>
+                        <a href="/Dashboard/List" class="btn btn-secondary shadow-sm rounded-3" title="Temizle">
+                            <i class="fas fa-undo"></i>
+                        </a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm rounded-3">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-header-dark">
+                        <tr class="text-uppercase" style="font-size: 0.85rem; letter-spacing: 0.5px;">
+                            <th class="ps-4 py-3">Fiş ID</th>
+                            <th>Tarih / Zaman</th>
+                            <th>Format</th>
+                            <th>Kategori</th>
+                            <th>Ürün Bilgisi</th>
+                            <th class="text-end pe-4">Tutar</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model != null && Model.Any())
+                        {
+                            @foreach (var item in Model)
+                            {
+                                <tr>
+                                    <td class="ps-4 fw-bold" style="color: var(--theme-primary);">#@item.Id</td>
+                                    <td>
+                                        <div class="d-flex flex-column">
+                                            <span class="fw-bold text-dark">@item.SaleDate.ToString("dd.MM.yyyy")</span>
+                                            <small class="text-muted">@item.SaleDate.ToString("HH:mm")</small>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        @if (item.StoreFormat == "S-Online")
+                                        {
+                                            <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 rounded-pill px-3 py-2"><i class="fas fa-globe me-1"></i> Online</span>
+                                        }
+                                        else if (item.StoreFormat == "S-Mega")
+                                        {
+                                            <span class="badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25 rounded-pill px-3 py-2"><i class="fas fa-store-alt me-1"></i> Mega</span>
+                                        }
+                                        else if (item.StoreFormat == "S-Super")
+                                        {
+                                            <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 rounded-pill px-3 py-2"><i class="fas fa-shopping-cart me-1"></i> Super</span>
+                                        }
+                                        else if (item.StoreFormat == "S-Express")
+                                        {
+                                            <span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 rounded-pill px-3 py-2"><i class="fas fa-bolt me-1"></i> Express</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-secondary rounded-pill px-3">@item.StoreFormat</span>
+                                        }
+                                    </td>
+                                    <td><span class="fw-medium text-secondary">@item.CategoryName</span></td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="bg-light rounded p-1 me-2 text-muted">
+                                                <i class="fas fa-box-open"></i>
+                                            </div>
+                                            <span class="fw-bold text-dark">@item.ProductName</span>
+                                        </div>
+                                    </td>
+                                    <td class="text-end pe-4 fw-bold" style="color: var(--theme-dark); font-size: 1.1rem;">
+                                        @item.TotalPrice.ToString("C2", trCulture)
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="6" class="text-center py-5">
+                                    <div class="opacity-50">
+                                        <i class="fas fa-search fa-3x mb-3 text-secondary"></i>
+                                        <h5 class="text-muted">Kayıt Bulunamadı</h5>
+                                        <p class="small">Lütfen filtre kriterlerinizi değiştirip tekrar deneyin.</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="card-footer bg-white py-3 border-top-0">
+            <nav>
+                <ul class="pagination justify-content-center m-0">
+                    @if (currentPage > 1)
+                    {
+                        <li class="page-item">
+                            <a class="page-link border-0 text-secondary" href="/Dashboard/List@(GetQuery(currentPage - 1))">
+                                <i class="fas fa-chevron-left me-1"></i> Önceki
+                            </a>
+                        </li>
+                    }
+
+                    <li class="page-item active">
+                        <span class="page-link border-0 fw-bold" style="background-color: var(--theme-primary);">@currentPage</span>
+                    </li>
+
+                    <li class="page-item">
+                        <a class="page-link border-0 text-secondary" href="/Dashboard/List@(GetQuery(currentPage + 1))">
+                            Sonraki <i class="fas fa-chevron-right ms-1"></i>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+</div>
