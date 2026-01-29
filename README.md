@@ -60,7 +60,7 @@ Proje, klasik Entity Framework yavaşlığından kaçınarak **Dapper Micro-ORM*
 
 ## 🛠️ Teknoloji Yığını (Tech Stack)
 
-* **Backend:** ASP.NET Core 8.0 MVC
+* **Backend:** ASP.NET Core 6.0 MVC
 * **Veritabanı:** MSSQL Server (SQL Scripts & Stored Procedures)
 * **ORM:** Dapper (Micro-ORM)
 * **Frontend:** Bootstrap 5, JavaScript, jQuery
